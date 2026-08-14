@@ -8,7 +8,7 @@
     {
       "binding": "DB",
       "database_name": "cloud-storage-manager",
-      "database_id": "replace-with-your-d1-database-id",
+      "database_id": "df50322f-1341-4816-b996-3710111affa4",
       "migrations_dir": "migrations"
     }
   ],
