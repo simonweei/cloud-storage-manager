@@ -1,0 +1,5 @@
+APP_PASSWORD="change-me"
+# 生成方式与 CONFIG_ENCRYPTION_KEY 相同，使用不同的随机值
+SESSION_SECRET="replace-with-a-base64-encoded-32-byte-key"
+# 生成方式：openssl rand -base64 32
+CONFIG_ENCRYPTION_KEY="replace-with-a-base64-encoded-32-byte-key"
