@@ -5,16 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "wrangler types && tsc -b && vite build",
+    "build": "wrangler types && tsc -b && vite build && node scripts/verify-worker-bundle.mjs",
     "preview": "vite preview",
     "deploy": "pnpm build && wrangler deploy",
+    "check:worker-bundle": "node scripts/verify-worker-bundle.mjs",
     "typecheck": "wrangler types && tsc -b",
     "test": "vitest run",
     "cf-typegen": "wrangler types"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1109.0",
-    "@aws-sdk/s3-request-presigner": "^3.1109.0",
+    "@aws-sdk/client-s3": "3.721.0",
+    "@aws-sdk/s3-request-presigner": "3.721.0",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
