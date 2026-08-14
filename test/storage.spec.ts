@@ -29,6 +29,17 @@ describe('connection validation', () => {
     }, true)).toThrow('必须使用 HTTPS')
   })
 
+  it('allows an HTTP public access URL while keeping the API endpoint secure', () => {
+    const result = parseConnectionInput({
+      name: 'HTTP public files', provider: 's3', endpoint: 'https://s3.example.com', region: 'us-east-1',
+      bucket: 'files', publicBaseUrl: 'http://cdn.example.com/', forcePathStyle: true,
+      accessKeyId: 'access', secretAccessKey: 'secret'
+    }, true)
+
+    expect(result.endpoint).toBe('https://s3.example.com')
+    expect(result.publicBaseUrl).toBe('http://cdn.example.com')
+  })
+
   it('accepts an arbitrary S3-compatible provider', () => {
     const result = parseConnectionInput({
       name: 'Compatible storage',

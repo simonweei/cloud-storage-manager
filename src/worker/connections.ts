@@ -50,8 +50,13 @@ function optionalText (record: Record<string, unknown>, key: string, maxLength: 
   return value.trim()
 }
 
-function normalizedUrl (value: string, label: string, allowEmpty = false): string {
-  if (!value && allowEmpty) return ''
+interface NormalizedUrlOptions {
+  allowEmpty?: boolean
+  allowHttp?: boolean
+}
+
+function normalizedUrl (value: string, label: string, options: NormalizedUrlOptions = {}): string {
+  if (!value && options.allowEmpty) return ''
   let url: URL
   try {
     url = new URL(value)
@@ -59,7 +64,7 @@ function normalizedUrl (value: string, label: string, allowEmpty = false): strin
     throw new HttpError(400, 'INVALID_CONNECTION', `${label}不是有效 URL`)
   }
   const isLocalHttp = url.protocol === 'http:' && ['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)
-  if (url.protocol !== 'https:' && !isLocalHttp) {
+  if (url.protocol !== 'https:' && !isLocalHttp && !(options.allowHttp && url.protocol === 'http:')) {
     throw new HttpError(400, 'INVALID_CONNECTION', `${label}必须使用 HTTPS；本地地址可使用 HTTP`)
   }
   if (url.username || url.password || url.search || url.hash) {
@@ -97,7 +102,7 @@ export function parseConnectionInput (value: unknown, credentialsRequired: boole
     endpoint: normalizedUrl(requiredText(record, 'endpoint', 'Endpoint', 500), 'Endpoint'),
     region,
     bucket: requiredText(record, 'bucket', 'Bucket', 255),
-    publicBaseUrl: normalizedUrl(optionalText(record, 'publicBaseUrl', 500), '公开访问域名', true),
+    publicBaseUrl: normalizedUrl(optionalText(record, 'publicBaseUrl', 500), '公开访问域名', { allowEmpty: true, allowHttp: true }),
     forcePathStyle: record.forcePathStyle === true,
     ...(accessKeyId ? { accessKeyId, secretAccessKey } : {}),
     ...(sessionToken ? { sessionToken } : {})
