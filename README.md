@@ -8,16 +8,14 @@
 - 保存多个 Endpoint、Region、Bucket 和访问凭证
 - 文件/目录列举、分页、上传、删除、图片预览和直链复制
 - 浏览器使用 10 分钟有效的预签名 PUT 地址直传
-- 连接凭证使用 AES-256-GCM 加密后保存到 D1
+- 连接凭证以明文保存到 D1，并可在编辑页面直接查看
 - 密码登录保护管理页面和所有管理 API，登录会话使用 HttpOnly Cookie
 
 ## 安全模型
 
-Access Key ID、Secret Access Key 和 Session Token 只在创建或更新连接时发送给 Worker。Worker 使用 `CONFIG_ENCRYPTION_KEY` 加密后写入 D1，连接列表接口不会返回这些凭证。
+Access Key ID、Secret Access Key 和 Session Token 以明文 JSON 写入 D1，并通过登录后的连接列表接口返回，以便在编辑页面直接查看和修改。请严格限制 Cloudflare 账户、D1 数据库和管理页面的访问权限。
 
-请妥善备份 `CONFIG_ENCRYPTION_KEY`。密钥变更后，原有连接凭证将无法解密，需要重新填写。
-
-管理页面使用 `APP_PASSWORD` 登录。登录成功后，Worker 会签发由 `SESSION_SECRET` 签名、有效期 12 小时的 HttpOnly、SameSite=Strict Cookie；连续输错 5 次会暂时锁定 15 分钟。生产环境请使用高强度密码，并确保 `SESSION_SECRET` 与加密密钥不同。若要立即让所有已有会话失效，请同时轮换 `SESSION_SECRET`。
+管理页面使用 `APP_PASSWORD` 登录。登录成功后，Worker 会签发由 `SESSION_SECRET` 签名、有效期 12 小时的 HttpOnly、SameSite=Strict Cookie；连续输错 5 次会暂时锁定 15 分钟。生产环境请使用高强度密码。若要立即让所有已有会话失效，请轮换 `SESSION_SECRET`。
 
 ## 本地运行
 
@@ -28,7 +26,7 @@ pnpm install
 Copy-Item .dev.vars.example .dev.vars
 ```
 
-在 `.dev.vars` 中设置 `APP_PASSWORD`，并分别生成两个不同的 32 字节随机值，写入 `SESSION_SECRET` 和 `CONFIG_ENCRYPTION_KEY`：
+在 `.dev.vars` 中设置 `APP_PASSWORD`，并生成一个 32 字节随机值写入 `SESSION_SECRET`：
 
 ```powershell
 $keyBytes = New-Object byte[] 32
@@ -57,7 +55,7 @@ pnpm dev
 | Bucket | S3 存储桶名称 |
 | 公开访问域名 | 可选，用于预览、打开和复制文件直链 |
 | Path-style | 兼容平台通常建议开启；若服务商要求虚拟主机寻址可关闭 |
-| Access Key ID / Secret Access Key | S3 访问凭证，仅在保存时提交 |
+| Access Key ID / Secret Access Key | S3 访问凭证，以明文保存并在编辑页面回显 |
 | Session Token | 使用临时凭证时填写 |
 
 常用 Endpoint：
@@ -84,7 +82,6 @@ pnpm wrangler d1 create cloud-storage-manager
 ```powershell
 pnpm wrangler secret put APP_PASSWORD
 pnpm wrangler secret put SESSION_SECRET
-pnpm wrangler secret put CONFIG_ENCRYPTION_KEY
 ```
 
 应用远程迁移并部署：

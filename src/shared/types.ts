@@ -11,7 +11,9 @@ export interface S3ConnectionInfo {
   bucket: string
   publicBaseUrl: string
   forcePathStyle: boolean
-  hasCredentials: boolean
+  accessKeyId: string
+  secretAccessKey: string
+  sessionToken: string
   createdAt: string
   updatedAt: string
 }

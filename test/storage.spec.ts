@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { parseConnectionInput } from '../src/worker/connections'
-import { decryptJson, encryptJson } from '../src/worker/utils/encryption'
 import { normalizeObjectKey, normalizePrefix, publicObjectUrl } from '../src/worker/utils/keys'
-
-const TestKey = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
 
 describe('connection validation', () => {
   it('normalizes a complete S3 connection', () => {
@@ -20,6 +17,8 @@ describe('connection validation', () => {
     }, true)
     expect(result.endpoint).toBe('https://account.r2.cloudflarestorage.com')
     expect(result.publicBaseUrl).toBe('https://files.example.com')
+    expect(result.accessKeyId).toBe('access')
+    expect(result.secretAccessKey).toBe('secret')
   })
 
   it('rejects insecure external endpoints', () => {
@@ -29,14 +28,12 @@ describe('connection validation', () => {
       accessKeyId: 'access', secretAccessKey: 'secret'
     }, true)).toThrow('必须使用 HTTPS')
   })
-})
 
-describe('credential encryption', () => {
-  it('round-trips credentials and binds them to the connection id', async () => {
-    const encrypted = await encryptJson({ accessKeyId: 'ak', secretAccessKey: 'sk' }, TestKey, 'connection-a')
-    expect(encrypted).not.toContain('"secretAccessKey":"sk"')
-    await expect(decryptJson(encrypted, TestKey, 'connection-a')).resolves.toEqual({ accessKeyId: 'ak', secretAccessKey: 'sk' })
-    await expect(decryptJson(encrypted, TestKey, 'connection-b')).rejects.toThrow('无法解密')
+  it('requires credentials when saving a connection', () => {
+    expect(() => parseConnectionInput({
+      name: 'R2', provider: 'r2', endpoint: 'https://account.r2.cloudflarestorage.com', region: 'auto',
+      bucket: 'files', publicBaseUrl: '', forcePathStyle: true
+    }, true)).toThrow('Access Key ID 和 Secret Access Key 不能为空')
   })
 })
 

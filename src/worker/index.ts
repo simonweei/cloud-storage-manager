@@ -89,7 +89,7 @@ async function route (request: Request, env: AppEnv): Promise<Response> {
   const connectionId = connectionIdFromPath(url.pathname)
   if (connectionId) {
     if (request.method === 'PUT') {
-      const input = parseConnectionInput(await readJson<unknown>(request), false)
+      const input = parseConnectionInput(await readJson<unknown>(request), true)
       return json(await updateConnection(env, connectionId, input))
     }
     if (request.method === 'DELETE') {

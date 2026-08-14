@@ -232,9 +232,9 @@ function StorageManager ({ onLogout }: { onLogout: () => void }) {
       bucket: connection.bucket,
       publicBaseUrl: connection.publicBaseUrl,
       forcePathStyle: connection.forcePathStyle,
-      accessKeyId: '',
-      secretAccessKey: '',
-      sessionToken: ''
+      accessKeyId: connection.accessKeyId,
+      secretAccessKey: connection.secretAccessKey,
+      sessionToken: connection.sessionToken
     })
     setEditorOpen(true)
   }
@@ -329,7 +329,7 @@ function StorageManager ({ onLogout }: { onLogout: () => void }) {
           ))}
           {!connections.length && !loading && <button className="empty-connection" onClick={openCreate}>添加第一个 S3 连接</button>}
         </nav>
-        <div className="sidebar-note"><span>安全存储</span>连接凭证在 Worker 中加密后保存，Secret Access Key 不会回传浏览器。</div>
+        <div className="sidebar-note"><span>密码保护</span>连接凭证以明文保存，仅登录管理页面后可查看和修改。</div>
       </aside>
 
       <main className="main">
@@ -407,9 +407,9 @@ function StorageManager ({ onLogout }: { onLogout: () => void }) {
               <label><span>Region</span><input value={form.region} onChange={event => setForm(current => ({ ...current, region: event.target.value }))} placeholder="auto" /></label>
               <label><span>Bucket</span><input value={form.bucket} onChange={event => setForm(current => ({ ...current, bucket: event.target.value }))} /></label>
               <label className="wide"><span>公开访问域名（可选）</span><input value={form.publicBaseUrl} onChange={event => setForm(current => ({ ...current, publicBaseUrl: event.target.value }))} placeholder="https://files.example.com" /></label>
-              <label><span>Access Key ID{editingId ? '（留空不修改）' : ''}</span><input autoComplete="off" value={form.accessKeyId} onChange={event => setForm(current => ({ ...current, accessKeyId: event.target.value }))} /></label>
-              <label><span>Secret Access Key{editingId ? '（留空不修改）' : ''}</span><input type="password" autoComplete="new-password" value={form.secretAccessKey} onChange={event => setForm(current => ({ ...current, secretAccessKey: event.target.value }))} /></label>
-              <label className="wide"><span>Session Token（可选）</span><input type="password" autoComplete="off" value={form.sessionToken} onChange={event => setForm(current => ({ ...current, sessionToken: event.target.value }))} /></label>
+              <label><span>Access Key ID</span><input autoComplete="off" value={form.accessKeyId} onChange={event => setForm(current => ({ ...current, accessKeyId: event.target.value }))} /></label>
+              <label><span>Secret Access Key</span><input autoComplete="off" value={form.secretAccessKey} onChange={event => setForm(current => ({ ...current, secretAccessKey: event.target.value }))} /></label>
+              <label className="wide"><span>Session Token（可选）</span><input autoComplete="off" value={form.sessionToken} onChange={event => setForm(current => ({ ...current, sessionToken: event.target.value }))} /></label>
               <label className="checkbox wide"><input type="checkbox" checked={form.forcePathStyle} onChange={event => setForm(current => ({ ...current, forcePathStyle: event.target.checked }))} /><span>使用 Path-style 寻址（多数兼容平台建议开启）</span></label>
             </div>
             <div className="modal-actions">{editingId && <button className="danger-button" onClick={() => { const current = connections.find(item => item.id === editingId); if (current) removeConnection(current).catch(console.error) }}>删除连接</button>}<span /><button className="secondary" onClick={() => setEditorOpen(false)}>取消</button><button className="primary" disabled={saving} onClick={() => saveConnection().catch(console.error)}>{saving ? '保存中…' : '保存连接'}</button></div>

@@ -23,8 +23,7 @@
   "secrets": {
     "required": [
       "APP_PASSWORD",
-      "SESSION_SECRET",
-      "CONFIG_ENCRYPTION_KEY"
+      "SESSION_SECRET"
     ]
   }
 }

@@ -1,6 +1,5 @@
 import { S3Providers, type S3ConnectionInfo, type S3ConnectionInput, type S3Provider } from '../shared/types'
 import type { AppEnv } from './env'
-import { decryptJson, encryptJson } from './utils/encryption'
 import { HttpError } from './utils/http'
 
 interface ConnectionRow {
@@ -106,6 +105,7 @@ export function parseConnectionInput (value: unknown, credentialsRequired: boole
 }
 
 function toInfo (row: ConnectionRow): S3ConnectionInfo {
+  const credentials = storedCredentials(row)
   return {
     id: row.id,
     name: row.name,
@@ -115,10 +115,28 @@ function toInfo (row: ConnectionRow): S3ConnectionInfo {
     bucket: row.bucket,
     publicBaseUrl: row.public_base_url,
     forcePathStyle: Boolean(row.force_path_style),
-    hasCredentials: Boolean(row.encrypted_credentials),
+    accessKeyId: credentials.accessKeyId,
+    secretAccessKey: credentials.secretAccessKey,
+    sessionToken: credentials.sessionToken ?? '',
     createdAt: row.created_at,
     updatedAt: row.updated_at
   }
+}
+
+function storedCredentials (row: ConnectionRow): S3Credentials {
+  try {
+    const credentials = JSON.parse(row.encrypted_credentials) as Partial<S3Credentials>
+    if (typeof credentials.accessKeyId === 'string' && typeof credentials.secretAccessKey === 'string') {
+      return {
+        accessKeyId: credentials.accessKeyId,
+        secretAccessKey: credentials.secretAccessKey,
+        ...(typeof credentials.sessionToken === 'string' && credentials.sessionToken ? { sessionToken: credentials.sessionToken } : {})
+      }
+    }
+  } catch {
+    // Existing encrypted records cannot be read after plaintext storage is enabled.
+  }
+  return { accessKeyId: '', secretAccessKey: '' }
 }
 
 async function findRow (env: AppEnv, id: string): Promise<ConnectionRow> {
@@ -134,7 +152,10 @@ export async function listConnections (env: AppEnv): Promise<S3ConnectionInfo[]>
 
 export async function getConnection (env: AppEnv, id: string): Promise<S3ConnectionConfig> {
   const row = await findRow(env, id)
-  const credentials = await decryptJson<S3Credentials>(row.encrypted_credentials, env.CONFIG_ENCRYPTION_KEY, row.id)
+  const credentials = storedCredentials(row)
+  if (!credentials.accessKeyId || !credentials.secretAccessKey) {
+    throw new HttpError(400, 'CREDENTIALS_REQUIRED', '连接凭证为空，请编辑连接并重新填写')
+  }
   return { ...toInfo(row), credentials }
 }
 
@@ -142,11 +163,11 @@ export async function createConnection (env: AppEnv, input: S3ConnectionInput): 
   if (!input.accessKeyId || !input.secretAccessKey) throw new HttpError(400, 'CREDENTIALS_REQUIRED', '连接凭证不能为空')
   const id = crypto.randomUUID()
   const now = new Date().toISOString()
-  const encrypted = await encryptJson({
+  const credentials = JSON.stringify({
     accessKeyId: input.accessKeyId,
     secretAccessKey: input.secretAccessKey,
     ...(input.sessionToken ? { sessionToken: input.sessionToken } : {})
-  }, env.CONFIG_ENCRYPTION_KEY, id)
+  })
 
   await env.DB.prepare(`
     INSERT INTO connections (
@@ -155,22 +176,20 @@ export async function createConnection (env: AppEnv, input: S3ConnectionInput): 
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).bind(
     id, input.name, input.provider, input.endpoint, input.region, input.bucket,
-    input.publicBaseUrl, input.forcePathStyle ? 1 : 0, encrypted, now, now
+    input.publicBaseUrl, input.forcePathStyle ? 1 : 0, credentials, now, now
   ).run()
 
   return toInfo(await findRow(env, id))
 }
 
 export async function updateConnection (env: AppEnv, id: string, input: S3ConnectionInput): Promise<S3ConnectionInfo> {
-  const existing = await findRow(env, id)
-  let encrypted = existing.encrypted_credentials
-  if (input.accessKeyId && input.secretAccessKey) {
-    encrypted = await encryptJson({
-      accessKeyId: input.accessKeyId,
-      secretAccessKey: input.secretAccessKey,
-      ...(input.sessionToken ? { sessionToken: input.sessionToken } : {})
-    }, env.CONFIG_ENCRYPTION_KEY, id)
-  }
+  await findRow(env, id)
+  if (!input.accessKeyId || !input.secretAccessKey) throw new HttpError(400, 'CREDENTIALS_REQUIRED', '连接凭证不能为空')
+  const credentials = JSON.stringify({
+    accessKeyId: input.accessKeyId,
+    secretAccessKey: input.secretAccessKey,
+    ...(input.sessionToken ? { sessionToken: input.sessionToken } : {})
+  })
 
   await env.DB.prepare(`
     UPDATE connections SET
@@ -179,7 +198,7 @@ export async function updateConnection (env: AppEnv, id: string, input: S3Connec
     WHERE id = ?
   `).bind(
     input.name, input.provider, input.endpoint, input.region, input.bucket,
-    input.publicBaseUrl, input.forcePathStyle ? 1 : 0, encrypted, new Date().toISOString(), id
+    input.publicBaseUrl, input.forcePathStyle ? 1 : 0, credentials, new Date().toISOString(), id
   ).run()
   return toInfo(await findRow(env, id))
 }
