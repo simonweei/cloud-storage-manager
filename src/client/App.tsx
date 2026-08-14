@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { S3ConnectionInfo, S3ConnectionInput, S3Provider, StorageObject } from '../shared/types'
 import { api } from './api'
-import { ArrowIcon, CloudIcon, CopyIcon, ExternalIcon, FileIcon, FolderIcon, RefreshIcon, TrashIcon, UploadIcon } from './icons'
+import { ArrowIcon, CloudIcon, CopyIcon, ExternalIcon, FileIcon, FolderIcon, GridIcon, ListIcon, RefreshIcon, TrashIcon, UploadIcon } from './icons'
 import { uploadFile } from './upload'
 
 interface UploadItem {
@@ -68,6 +68,7 @@ function isPreviewableImage (item: StorageObject): boolean {
 }
 
 type AuthState = 'checking' | 'authenticated' | 'unauthenticated'
+type FileView = 'list' | 'grid'
 
 function LoginScreen ({ onLogin }: { onLogin: () => void }) {
   const [password, setPassword] = useState('')
@@ -161,6 +162,7 @@ function StorageManager ({ onLogout }: { onLogout: () => void }) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<ConnectionForm>(EmptyForm)
   const [saving, setSaving] = useState(false)
+  const [fileView, setFileView] = useState<FileView>('list')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const activeConnection = connections.find(item => item.id === connectionId)
@@ -376,10 +378,17 @@ function StorageManager ({ onLogout }: { onLogout: () => void }) {
                   <button onClick={() => setPrefix('')}>{activeConnection.bucket}</button>
                   {breadcrumbs.map(crumb => <span key={crumb.prefix}>/<button onClick={() => setPrefix(crumb.prefix)}>{crumb.name}</button></span>)}
                 </div>
-                <div className="files-tools"><span>{objects.length} 项</span><button className="icon-button" title="刷新" onClick={() => loadObjects().catch(console.error)}><RefreshIcon /></button></div>
+                <div className="files-tools">
+                  <span>{objects.length} 项</span>
+                  <div className="view-toggle" role="group" aria-label="文件显示方式">
+                    <button className={fileView === 'list' ? 'active' : ''} title="列表视图" aria-pressed={fileView === 'list'} onClick={() => setFileView('list')}><ListIcon /><span>列表</span></button>
+                    <button className={fileView === 'grid' ? 'active' : ''} title="平铺视图" aria-pressed={fileView === 'grid'} onClick={() => setFileView('grid')}><GridIcon /><span>平铺</span></button>
+                  </div>
+                  <button className="icon-button" title="刷新" onClick={() => loadObjects().catch(console.error)}><RefreshIcon /></button>
+                </div>
               </div>
               {loading && objects.length === 0 ? <div className="empty"><div className="spinner" /><p>正在读取云端文件…</p></div> : objects.length === 0 ? <div className="empty"><FolderIcon /><h3>这里还没有文件</h3><p>上传第一个文件，或确认连接参数和列表权限。</p></div> : (
-                <div className="file-grid">{objects.map(item => (
+                <div className={`file-grid ${fileView}-view`}>{objects.map(item => (
                   <article className={item.isDirectory ? 'file-card directory' : 'file-card'} key={item.key}>
                     <button className="file-preview" onClick={() => item.isDirectory ? setPrefix(item.key) : item.url && window.open(item.url, '_blank', 'noopener,noreferrer')}>
                       {item.isDirectory ? <FolderIcon /> : isPreviewableImage(item) && item.url ? <img src={item.url} alt="" loading="lazy" /> : <FileIcon />}

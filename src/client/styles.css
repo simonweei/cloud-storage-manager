@@ -127,6 +127,11 @@ button { color: inherit; }
 .breadcrumbs > button:not(.icon-button), .breadcrumbs span button { border: 0; padding: 2px; color: #aab5ca; background: transparent; cursor: pointer; }
 .breadcrumbs span { display: flex; gap: 5px; }
 .files-tools { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 10px; }
+.view-toggle { height: 30px; padding: 2px; display: flex; align-items: center; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.025); }
+.view-toggle button { height: 24px; padding: 0 8px; display: flex; align-items: center; gap: 5px; border: 0; border-radius: 6px; color: #7f8ca5; background: transparent; font-size: 10px; cursor: pointer; }
+.view-toggle button:hover { color: #cbd5e7; }
+.view-toggle button.active { color: #eeeaff; background: rgba(124,92,255,.2); }
+.view-toggle svg { width: 13px; }
 .icon-button { width: 30px; height: 30px; padding: 0; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 8px; background: rgba(255,255,255,.025); cursor: pointer; }
 .icon-button:hover { background: rgba(255,255,255,.06); }
 .icon-button svg { width: 14px; }
@@ -148,6 +153,15 @@ button { color: inherit; }
 .file-actions button:hover, .file-actions a:hover { color: white; background: rgba(255,255,255,.08); }
 .file-actions .danger:hover { color: #ff7d91; background: rgba(255,77,107,.1); }
 .file-actions svg { width: 13px; }
+.file-grid.list-view { padding: 8px 16px 14px; display: flex; flex-direction: column; gap: 0; }
+.list-view .file-card { min-height: 58px; display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; align-items: center; overflow: visible; border: 0; border-bottom: 1px solid rgba(148,163,184,.1); border-radius: 0; background: transparent; }
+.list-view .file-card:hover { border-color: rgba(148,163,184,.1); border-radius: 9px; background: rgba(255,255,255,.025); transform: none; }
+.list-view .file-preview, .list-view .directory .file-preview { width: 42px; height: 42px; border-radius: 8px; }
+.list-view .file-preview > svg { width: 21px; }
+.list-view .file-preview img { border-radius: 8px; }
+.list-view .file-meta { min-width: 0; padding: 0 14px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, 190px); align-items: center; gap: 18px; }
+.list-view .file-meta span { margin-top: 0; text-align: right; }
+.list-view .file-actions { position: static; margin-right: 4px; padding: 2px; border: 0; background: transparent; opacity: 1; transform: none; }
 .empty { min-height: 280px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #596680; text-align: center; }
 .empty > svg { width: 46px; margin-bottom: 13px; }
 .empty h3 { color: #9ca8bf; font-size: 13px; margin: 0; }
@@ -206,6 +220,14 @@ button { color: inherit; }
   .file-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 10px; }
   .file-preview { height: 105px; }
   .file-actions { opacity: 1; transform: none; }
+  .view-toggle button { width: 27px; padding: 0; justify-content: center; }
+  .view-toggle button span { display: none; }
+  .file-grid.list-view { padding: 6px 10px 12px; display: flex; gap: 0; }
+  .list-view .file-card { grid-template-columns: 42px minmax(0, 1fr) auto; }
+  .list-view .file-preview, .list-view .directory .file-preview { width: 38px; height: 38px; }
+  .list-view .file-meta { padding: 0 8px; display: block; }
+  .list-view .file-meta span { margin-top: 4px; text-align: left; }
+  .list-view .file-actions button, .list-view .file-actions a { width: 24px; }
   .modal-backdrop { padding: 10px; }
   .connection-modal { max-height: calc(100vh - 20px); }
   .connection-form { grid-template-columns: 1fr; padding: 18px; }

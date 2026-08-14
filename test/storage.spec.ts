@@ -29,6 +29,31 @@ describe('connection validation', () => {
     }, true)).toThrow('必须使用 HTTPS')
   })
 
+  it('accepts an arbitrary S3-compatible provider', () => {
+    const result = parseConnectionInput({
+      name: 'Compatible storage',
+      provider: 's3',
+      endpoint: 'https://objects.storage.example.com/',
+      region: 'ap-southeast-1',
+      bucket: 'media',
+      publicBaseUrl: 'https://cdn.example.com/',
+      forcePathStyle: false,
+      accessKeyId: 'access',
+      secretAccessKey: 'secret',
+      sessionToken: 'temporary-token'
+    }, true)
+
+    expect(result).toMatchObject({
+      provider: 's3',
+      endpoint: 'https://objects.storage.example.com',
+      region: 'ap-southeast-1',
+      bucket: 'media',
+      publicBaseUrl: 'https://cdn.example.com',
+      forcePathStyle: false,
+      sessionToken: 'temporary-token'
+    })
+  })
+
   it('requires credentials when saving a connection', () => {
     expect(() => parseConnectionInput({
       name: 'R2', provider: 'r2', endpoint: 'https://account.r2.cloudflarestorage.com', region: 'auto',
