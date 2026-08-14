@@ -69,6 +69,7 @@ function isPreviewableImage (item: StorageObject): boolean {
 
 type AuthState = 'checking' | 'authenticated' | 'unauthenticated'
 type FileView = 'list' | 'grid'
+const cloudOssIconUrl = new URL('../../cloudoss.png', import.meta.url).href
 
 function LoginScreen ({ onLogin }: { onLogin: () => void }) {
   const [password, setPassword] = useState('')
@@ -94,7 +95,7 @@ function LoginScreen ({ onLogin }: { onLogin: () => void }) {
   return (
     <main className="auth-page">
       <section className="auth-card">
-        <div className="auth-brand-mark"><CloudIcon /></div>
+        <div className="auth-brand-mark"><img src={cloudOssIconUrl} alt="" /></div>
         <p className="auth-eyebrow">CLOUD SHELF</p>
         <h1>欢迎回来</h1>
         <p className="auth-description">输入访问密码后，才能查看和管理你的 S3 存储空间。</p>
@@ -323,7 +324,7 @@ function StorageManager ({ onLogout }: { onLogout: () => void }) {
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <div className="brand-mark"><CloudIcon /></div>
+          <div className="brand-mark"><img src={cloudOssIconUrl} alt="" /></div>
           <div><strong>Cloud Shelf</strong><span>S3 对象存储管理器</span></div>
         </div>
         <div className="sidebar-heading"><p className="eyebrow">存储连接</p><button onClick={openCreate}>＋ 添加</button></div>

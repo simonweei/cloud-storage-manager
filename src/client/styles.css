@@ -25,7 +25,7 @@ button { color: inherit; }
 .auth-page::after { width: 420px; height: 420px; bottom: -260px; left: -100px; background: radial-gradient(circle, rgba(66, 216, 197, .1), transparent 68%); }
 .auth-card { position: relative; z-index: 1; width: min(420px, 100%); padding: 44px 42px 34px; border: 1px solid rgba(148, 163, 184, .18); border-radius: 24px; background: rgba(15, 22, 38, .84); box-shadow: 0 30px 90px rgba(0, 0, 0, .38); backdrop-filter: blur(24px); }
 .auth-brand-mark { width: 58px; height: 58px; margin-bottom: 28px; display: grid; place-items: center; border-radius: 17px; color: white; background: linear-gradient(145deg, #896eff, #5333c5); box-shadow: 0 16px 40px rgba(94, 65, 221, .35); }
-.auth-brand-mark svg { width: 29px; }
+.auth-brand-mark img { width: 40px; height: 40px; object-fit: contain; }
 .auth-eyebrow { margin: 0 0 8px; color: #8d7bdf; font-size: 10px; font-weight: 700; letter-spacing: .2em; }
 .auth-card h1 { margin: 0; font-size: 30px; letter-spacing: -.04em; }
 .auth-description { margin: 10px 0 28px; color: var(--muted); font-size: 13px; line-height: 1.7; }
@@ -44,7 +44,7 @@ button { color: inherit; }
 .sidebar { position: sticky; top: 0; height: 100vh; padding: 28px 18px; border-right: 1px solid var(--line); background: rgba(9, 14, 26, 0.86); backdrop-filter: blur(22px); display: flex; flex-direction: column; }
 .brand { display: flex; align-items: center; gap: 12px; padding: 0 8px 32px; }
 .brand-mark { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px; color: white; background: linear-gradient(145deg, #815eff, #4930ba); box-shadow: 0 10px 30px rgba(94, 65, 221, 0.33); }
-.brand-mark svg { width: 23px; }
+.brand-mark img { width: 30px; height: 30px; object-fit: contain; }
 .brand strong, .brand span { display: block; }
 .brand strong { font-size: 17px; letter-spacing: -0.02em; }
 .brand span { color: var(--muted); font-size: 11px; margin-top: 2px; }
