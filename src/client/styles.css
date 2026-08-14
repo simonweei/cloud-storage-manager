@@ -85,6 +85,8 @@ button { color: inherit; }
 .primary:disabled { opacity: .45; cursor: not-allowed; }
 .error-banner { margin-bottom: 18px; padding: 11px 14px; border: 1px solid rgba(255, 102, 126, .26); border-radius: 10px; color: #ffbdc8; background: rgba(170, 34, 58, .12); display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
 .error-banner button { border: 0; color: #ffbdc8; background: transparent; cursor: pointer; text-decoration: underline; }
+.success-banner { margin-bottom: 18px; padding: 11px 14px; border: 1px solid rgba(66, 216, 197, .26); border-radius: 10px; color: #8be9dc; background: rgba(26, 132, 119, .12); display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+.success-banner button { border: 0; color: #8be9dc; background: transparent; cursor: pointer; text-decoration: underline; }
 .welcome-panel { min-height: 430px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid var(--line); border-radius: 20px; background: var(--panel); text-align: center; }
 .welcome-panel h2 { margin: 22px 0 7px; font-size: 22px; }
 .welcome-panel p { margin: 0 0 22px; color: var(--muted); font-size: 12px; }
@@ -164,6 +166,9 @@ button { color: inherit; }
 .connection-form label { min-width: 0; }
 .connection-form label > span { display: block; margin: 0 0 6px 2px; color: #9aa7bf; font-size: 10px; }
 .connection-form label.wide { grid-column: 1 / -1; }
+.connection-error { grid-column: 1 / -1; padding: 11px 12px; border: 1px solid rgba(255, 102, 126, .26); border-radius: 9px; color: #ffbdc8; background: rgba(170, 34, 58, .12); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; font-size: 11px; line-height: 1.5; }
+.connection-error span { min-width: 0; overflow-wrap: anywhere; }
+.connection-error button { flex: 0 0 auto; width: 22px; height: 22px; padding: 0; border: 0; color: #ffbdc8; background: transparent; font-size: 17px; line-height: 1; cursor: pointer; }
 .connection-form input:not([type='checkbox']), .connection-form select { width: 100%; height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 9px; outline: 0; color: #e4eaf7; background: #0a101e; font-size: 12px; }
 .connection-form input:focus, .connection-form select:focus { border-color: rgba(124,92,255,.7); }
 .connection-form .checkbox { display: flex; align-items: center; gap: 9px; }

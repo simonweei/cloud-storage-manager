@@ -153,9 +153,11 @@ function StorageManager ({ onLogout }: { onLogout: () => void }) {
   const [cursor, setCursor] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
   const [uploadQueue, setUploadQueue] = useState<UploadItem[]>([])
   const [dragging, setDragging] = useState(false)
   const [editorOpen, setEditorOpen] = useState(false)
+  const [editorError, setEditorError] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState<ConnectionForm>(EmptyForm)
   const [saving, setSaving] = useState(false)
@@ -211,12 +213,16 @@ function StorageManager ({ onLogout }: { onLogout: () => void }) {
   }, [prefix])
 
   const openCreate = () => {
+    setSuccessMessage('')
+    setEditorError('')
     setEditingId(null)
     setForm({ ...EmptyForm })
     setEditorOpen(true)
   }
 
   const openEdit = (connection: S3ConnectionInfo) => {
+    setSuccessMessage('')
+    setEditorError('')
     setEditingId(connection.id)
     setForm({
       name: connection.name,
@@ -236,15 +242,17 @@ function StorageManager ({ onLogout }: { onLogout: () => void }) {
   const saveConnection = async () => {
     try {
       setSaving(true)
-      setError('')
+      setSuccessMessage('')
+      setEditorError('')
       const saved = editingId
         ? await api.updateConnection(editingId, form)
         : await api.createConnection(form)
       await loadConnections()
       setConnectionId(saved.id)
       setEditorOpen(false)
+      setSuccessMessage(editingId ? '连接修改成功' : '连接添加成功')
     } catch (saveError) {
-      setError(saveError instanceof Error ? saveError.message : '连接保存失败')
+      setEditorError(saveError instanceof Error ? saveError.message : '连接保存失败')
     } finally {
       setSaving(false)
     }
@@ -253,11 +261,12 @@ function StorageManager ({ onLogout }: { onLogout: () => void }) {
   const removeConnection = async (connection: S3ConnectionInfo) => {
     if (!window.confirm(`确定删除连接“${connection.name}”吗？云端文件不会被删除。`)) return
     try {
+      setEditorError('')
       await api.deleteConnection(connection.id)
       await loadConnections()
       setEditorOpen(false)
     } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : '连接删除失败')
+      setEditorError(deleteError instanceof Error ? deleteError.message : '连接删除失败')
     }
   }
 
@@ -330,6 +339,7 @@ function StorageManager ({ onLogout }: { onLogout: () => void }) {
         </header>
 
         {error && <div className="error-banner"><span>{error}</span><button onClick={() => setError('')}>关闭</button></div>}
+        {successMessage && <div className="success-banner" role="status"><span>{successMessage}</span><button onClick={() => setSuccessMessage('')}>关闭</button></div>}
 
         {!activeConnection ? (
           <section className="welcome-panel">
@@ -390,6 +400,7 @@ function StorageManager ({ onLogout }: { onLogout: () => void }) {
           <section className="connection-modal" role="dialog" aria-modal="true" aria-labelledby="connection-title">
             <div className="modal-header"><div><p className="eyebrow">S3 CONNECTION</p><h2 id="connection-title">{editingId ? '编辑连接' : '添加连接'}</h2></div><button className="modal-close" onClick={() => setEditorOpen(false)}>×</button></div>
             <div className="connection-form">
+              {editorError && <div className="connection-error wide" role="alert"><span>{editorError}</span><button type="button" onClick={() => setEditorError('')} aria-label="关闭错误提示">×</button></div>}
               <label><span>平台</span><select value={form.provider} onChange={event => { const provider = event.target.value as S3Provider; setForm(current => ({ ...current, provider, ...providerDefaults(provider), name: current.name || ProviderNames[provider] })) }}>{Object.entries(ProviderNames).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
               <label><span>连接名称</span><input value={form.name} onChange={event => setForm(current => ({ ...current, name: event.target.value }))} placeholder="例如：生产环境 R2" /></label>
               <label className="wide"><span>Endpoint</span><input value={form.endpoint} onChange={event => setForm(current => ({ ...current, endpoint: event.target.value }))} placeholder={form.provider === 'r2' ? 'https://<ACCOUNT_ID>.r2.cloudflarestorage.com' : 'https://s3.example.com'} /></label>
