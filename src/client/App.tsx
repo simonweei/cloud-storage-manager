@@ -301,6 +301,14 @@ function StorageManager ({ onLogout }: { onLogout: () => void }) {
 
   const copyUrl = async (url: string) => navigator.clipboard.writeText(url)
 
+  const openObject = (item: StorageObject) => {
+    if (item.isDirectory) {
+      setPrefix(item.key)
+    } else if (item.url) {
+      window.open(item.url, '_blank', 'noopener,noreferrer')
+    }
+  }
+
   const deleteObject = async (item: StorageObject) => {
     if (item.isDirectory || !window.confirm(`确定删除 ${item.name} 吗？此操作无法撤销。`)) return
     try {
@@ -390,10 +398,10 @@ function StorageManager ({ onLogout }: { onLogout: () => void }) {
               {loading && objects.length === 0 ? <div className="empty"><div className="spinner" /><p>正在读取云端文件…</p></div> : objects.length === 0 ? <div className="empty"><FolderIcon /><h3>这里还没有文件</h3><p>上传第一个文件，或确认连接参数和列表权限。</p></div> : (
                 <div className={`file-grid ${fileView}-view`}>{objects.map(item => (
                   <article className={item.isDirectory ? 'file-card directory' : 'file-card'} key={item.key}>
-                    <button className="file-preview" onClick={() => item.isDirectory ? setPrefix(item.key) : item.url && window.open(item.url, '_blank', 'noopener,noreferrer')}>
+                    <button className="file-preview" title={item.isDirectory ? '进入目录' : '打开文件'} onClick={() => openObject(item)}>
                       {item.isDirectory ? <FolderIcon /> : isPreviewableImage(item) && item.url ? <img src={item.url} alt="" loading="lazy" /> : <FileIcon />}
                     </button>
-                    <div className="file-meta"><b title={item.name}>{item.name}</b><span>{item.isDirectory ? '目录' : `${formatBytes(item.size)} · ${item.lastModified ? new Date(item.lastModified).toLocaleDateString('zh-CN') : '未知日期'}`}</span></div>
+                    <div className="file-meta"><button className="file-name" title={item.isDirectory ? `进入 ${item.name}` : `打开 ${item.name}`} onClick={() => openObject(item)}>{item.name}</button><span>{item.isDirectory ? '目录' : `${formatBytes(item.size)} · ${item.lastModified ? new Date(item.lastModified).toLocaleDateString('zh-CN') : '未知日期'}`}</span></div>
                     {!item.isDirectory && <div className="file-actions">{item.url && <><button title="复制直链" onClick={() => copyUrl(item.url).catch(console.error)}><CopyIcon /></button><a title="打开直链" href={item.url} target="_blank" rel="noreferrer"><ExternalIcon /></a></>}<button className="danger" title="删除" onClick={() => deleteObject(item).catch(console.error)}><TrashIcon /></button></div>}
                   </article>
                 ))}</div>
